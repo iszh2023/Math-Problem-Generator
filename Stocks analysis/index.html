@@ -10,29 +10,14 @@
     <script>
       window.STOCK_PROXY_URL = "https://ai-stock-analysis-6nk5.onrender.com";
     </script>
-    <header>
+    <header class="hero">
       <button id="open-settings" class="settings-btn" type="button">
         Settings ⚙️
       </button>
-      <h1>Stocks Analysis</h1>
-      <p class="tagline">Global quote snapshots powered by Yahoo Finance data</p>
-      <form id="search-form">
-        <input
-          type="text"
-          id="search-input"
-          placeholder="NO STOCK INFO"
-          autocomplete="off"
-        />
-        <button type="submit">Search</button>
-      </form>
-      <p class="hint">
-        Tip: open this folder with VS Code and use the Live Server extension to
-        avoid CORS issues.
-      </p>
-      <p class="permission-note">
-        Live quotes may be outdated because of permission/network restrictions. Cached values are shown when live data is blocked.
-        Use the hosted proxy at <a href="https://ai-stock-analysis-6nk5.onrender.com" target="_blank" rel="noopener">ai-stock-analysis-6nk5.onrender.com</a> (or run <code>node server.js</code> locally) when finance APIs are blocked directly.
-      </p>
+      <div class="hero-content">
+        <h1>Stocks Analysis</h1>
+        <p class="hero-tagline">Advanced predictions powered by artificial intelligence</p>
+      </div>
     </header>
 
     <div id="refresh-indicator" class="refresh-indicator" aria-hidden="true">
@@ -42,6 +27,195 @@
     </div>
 
     <main>
+      <section class="primary-layout">
+        <article class="search-card">
+          <h2>Search stocks</h2>
+          <form id="search-form" class="search-form">
+            <div class="search-input-group">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Search stocks or exchange pattern (e.g., AAPL or FRA:AAPL)"
+                autocomplete="off"
+              />
+              <button type="submit">Search</button>
+            </div>
+          </form>
+          <div class="quick-tickers" id="quick-tickers" aria-label="Popular tickers">
+            <button type="button" class="quick-ticker" data-symbol="AAPL">AAPL</button>
+            <button type="button" class="quick-ticker" data-symbol="GOOGL">GOOGL</button>
+            <button type="button" class="quick-ticker" data-symbol="MSFT">MSFT</button>
+            <button type="button" class="quick-ticker" data-symbol="AMZN">AMZN</button>
+            <button type="button" class="quick-ticker" data-symbol="TSLA">TSLA</button>
+            <button type="button" class="quick-ticker" data-symbol="NVDA">NVDA</button>
+          </div>
+          <p class="hint">
+            Tip: open this folder with VS Code and use the Live Server extension to avoid CORS issues.
+          </p>
+          <p class="permission-note">
+            Live quotes may be outdated because of permission/network restrictions. Cached values are shown when live data is blocked.
+            Use the hosted proxy at <a href="https://ai-stock-analysis-6nk5.onrender.com" target="_blank" rel="noopener">ai-stock-analysis-6nk5.onrender.com</a> (or run <code>node server.js</code> locally) when finance APIs are blocked directly.
+          </p>
+        </article>
+        <aside class="watchlist-card">
+          <div class="watchlist-header">
+            <h2>Watchlist</h2>
+            <span class="watchlist-note">Tap a symbol to load its full insight</span>
+          </div>
+          <div id="watchlist-container" class="watchlist-list">
+            <p class="placeholder">Loading watchlist…</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="detail-grid">
+        <article id="detail-card" class="detail-card">
+          <header class="detail-header">
+            <div>
+              <h2 id="detail-symbol">—</h2>
+              <p id="detail-name">Select a ticker to view live analysis.</p>
+            </div>
+            <div class="detail-meta">
+              <span id="detail-source" class="detail-source">—</span>
+              <button type="button" id="detail-open-google" class="detail-link" disabled>
+                Open in Google Finance
+              </button>
+            </div>
+          </header>
+          <div class="detail-price">
+            <div class="detail-price-stack">
+              <span class="detail-price-label">Real-time price</span>
+              <span class="detail-price-value" id="detail-price">—</span>
+            </div>
+            <div id="detail-change-wrapper" class="detail-change">
+              <span id="detail-change-abs">—</span>
+              <span id="detail-change-pct"></span>
+            </div>
+          </div>
+          <p class="detail-change-summary" id="detail-change-summary">Waiting for live data…</p>
+          <dl class="detail-stats">
+            <div>
+              <dt>Volume</dt>
+              <dd id="detail-volume">—</dd>
+            </div>
+            <div>
+              <dt>Market Cap</dt>
+              <dd id="detail-marketcap">—</dd>
+            </div>
+            <div>
+              <dt>Day Range</dt>
+              <dd id="detail-range-day">—</dd>
+            </div>
+            <div>
+              <dt>52W Range</dt>
+              <dd id="detail-range-year">—</dd>
+            </div>
+          </dl>
+          <div class="detail-chart">
+            <div class="chart-header">
+              <span>Price History</span>
+              <div class="chart-range">
+                <button type="button" class="chart-range-btn active" data-range="1D">1D</button>
+                <button type="button" class="chart-range-btn" data-range="1W">1W</button>
+                <button type="button" class="chart-range-btn" data-range="1M">1M</button>
+                <button type="button" class="chart-range-btn" data-range="3M">3M</button>
+                <button type="button" class="chart-range-btn" data-range="1Y">1Y</button>
+              </div>
+            </div>
+            <div class="chart-canvas" aria-hidden="true">
+              <div class="chart-placeholder">
+                <span>Chart preview unavailable in offline mode</span>
+              </div>
+            </div>
+          </div>
+          <section class="tech-panel">
+            <h3>Technical Indicators</h3>
+            <div class="tech-grid">
+              <div class="indicator-card">
+                <span class="indicator-label">RSI (14)</span>
+                <span class="indicator-value" id="detail-rsi">—</span>
+                <span class="indicator-note" id="detail-rsi-note">—</span>
+              </div>
+              <div class="indicator-card">
+                <span class="indicator-label">MACD</span>
+                <span class="indicator-value" id="detail-macd">—</span>
+                <span class="indicator-note" id="detail-macd-note">—</span>
+              </div>
+              <div class="indicator-card">
+                <span class="indicator-label">SMA (50)</span>
+                <span class="indicator-value" id="detail-sma-50">—</span>
+                <span class="indicator-note" id="detail-sma-50-note">—</span>
+              </div>
+              <div class="indicator-card">
+                <span class="indicator-label">SMA (200)</span>
+                <span class="indicator-value" id="detail-sma-200">—</span>
+                <span class="indicator-note" id="detail-sma-200-note">—</span>
+              </div>
+            </div>
+          </section>
+        </article>
+        <aside class="insight-stack">
+          <article class="insight-card news-card">
+            <header>
+              <h3>Latest News</h3>
+              <button type="button" class="text-button" id="news-refresh">Refresh</button>
+            </header>
+            <ul id="news-list" class="news-list">
+              <li class="placeholder">Headlines populate once a ticker is selected.</li>
+            </ul>
+            <button type="button" class="text-button muted" id="news-more" disabled>Show More</button>
+          </article>
+          <article class="insight-card prediction-card" id="prediction-panel">
+            <header>
+              <h3>AI Predictions</h3>
+              <span id="prediction-stance" class="prediction-stance neutral">NEUTRAL</span>
+            </header>
+            <div class="prediction-body">
+              <div>
+                <span class="prediction-label">Confidence Score</span>
+                <span class="prediction-value" id="prediction-confidence">—</span>
+              </div>
+              <div>
+                <span class="prediction-label">Predicted Change</span>
+                <span class="prediction-value" id="prediction-change">—</span>
+              </div>
+            </div>
+            <ul id="key-signals" class="signals-list">
+              <li class="placeholder">No signals yet.</li>
+            </ul>
+            <p class="prediction-disclaimer">
+              AI predictions are for informational purposes only and should not be considered financial advice.
+            </p>
+          </article>
+          <article class="insight-card sentiment-card" id="sentiment-panel">
+            <header>
+              <h3>Market Sentiment</h3>
+              <span id="sentiment-summary" class="sentiment-summary">Neutral</span>
+            </header>
+            <div class="sentiment-bars">
+              <div class="sentiment-row">
+                <span>Positive</span>
+                <div class="sentiment-bar">
+                  <span id="sentiment-positive" style="width:0%">0%</span>
+                </div>
+              </div>
+              <div class="sentiment-row">
+                <span>Neutral</span>
+                <div class="sentiment-bar neutral">
+                  <span id="sentiment-neutral" style="width:0%">0%</span>
+                </div>
+              </div>
+              <div class="sentiment-row">
+                <span>Negative</span>
+                <div class="sentiment-bar negative">
+                  <span id="sentiment-negative" style="width:0%">0%</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </aside>
+      </section>
+
       <section class="feature-card best-card">
         <h2>Top Pick · #1</h2>
         <div class="feature-body" id="feature-body">
@@ -81,16 +255,9 @@
       </section>
 
       <section class="results">
-        <h2>Quote Lookup</h2>
+        <h2>Search Results</h2>
         <div id="results-container" class="results-container">
           <p class="placeholder">Search a ticker to see detailed quote data.</p>
-        </div>
-      </section>
-
-      <section class="watchlist">
-        <h2>Trending Watchlist</h2>
-        <div id="watchlist-container" class="watchlist-container">
-          <p class="placeholder">Loading watchlist…</p>
         </div>
       </section>
     </main>
@@ -201,10 +368,6 @@
         <button class="quick-google" type="button">View on Google Finance</button>
       </article>
     </template>
-    <script>
-      window.STOCK_PROXY_URL = "https://ai-stock-analysis.onrender.com?symbol=";
-    </script>
-
     <script src="app.js?v=20241025" type="module"></script>
   </body>
 </html>
